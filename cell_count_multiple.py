@@ -280,16 +280,6 @@ destination_folder = os.path.join(animal_id, "cc_auto_results")
 if not os.path.exists(destination_folder):
     os.mkdir(destination_folder)
 
-# save_structure = {"cwd" : cwd,
-#                   "animal" : animal_id,
-#                   "models" : (red_model, green_model),
-#                   "xml" : basicxml,
-#                   "destination" : destination_folder,
-#                   "save" : None,
-#                   "image" : None,
-#                   "composite" : None,
-#                   "coords" : None
-#                   }
 
 for path in os.listdir(animal_id):
 
