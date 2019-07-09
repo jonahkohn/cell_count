@@ -60,7 +60,9 @@ def load_images(save_structure):
 def segment(img, model, probability_cutoff = .80, small_object_cutoff = 30):
 
     image_predict = model.predict(np.asarray([img]))
-    image_predict = np.reshape(image_predict, (1024, 1024))
+    img = np.reshape(image_predict, (1024, 1024))
+
+    image_predict = img
 
     cutoff_indexes = image_predict <= probability_cutoff
     image_predict[cutoff_indexes] = 0 #adjusts the image to only include pixels above probability_cutoff
@@ -70,13 +72,16 @@ def segment(img, model, probability_cutoff = .80, small_object_cutoff = 30):
     image_predict = image_predict.astype(int)
 
     distance = ndi.distance_transform_edt(image_predict)
-    local_maxi = peak_local_max(distance, min_distance=15, indices=False, footprint=np.ones((10, 10)), labels=image_predict)
+    distance_blur = gaussian(distance, sigma = 1.2, preserve_range = True)
+    local_maxi = peak_local_max(distance_blur, indices = False, footprint = np.ones((8, 8)), labels = img)
     markers = ndi.label(local_maxi)[0]
-    image_watershed = watershed(-distance, markers, mask=image_predict, compactness = 0.9, watershed_line = True)
+    image_watershed = watershed(-distance_blur, markers, mask = image_predict, watershed_line = True)
 
     image_labelled = label(image_watershed)
-    image_cleaned = remove_small_objects(image_labelled, small_object_cutoff, connectivity=2, in_place = False)
-    image_labelled = label(image_cleaned)
+    image_cleaned = remove_small_objects(image_labelled, small_object_cutoff, connectivity = 1, in_place = False)
+    image_labelled, num = label(image_cleaned, return_num = True)
+
+    print("# labelled: " + str(num))
 
     r_props = regionprops(image_labelled)
 
@@ -163,16 +168,16 @@ def save_counts(save_structure, cell_coords):
 
             cell_count_xml['CellCounter_Marker_File']["Marker_Data"]['Marker_Type'][cell_marker_type]["Marker"] = cell_counts[cell_marker_type]
 
-            cell_count_xml['CellCounter_Marker_File']["Image_Properties"]["Image_Filename"] = "DualLabeled_MIP.tif"
+            cell_count_xml['CellCounter_Marker_File']["Image_Properties"]["Image_Filename"] = "single_composite_MIP.tif"
 
-    save_xml = os.path.join(save_structure["save"],"cell_count_auto.xml")
+    save_xml = os.path.join(save_structure["save"],"single_cell_count_auto.xml")
     xml_string = xmltodict.unparse(cell_count_xml, pretty=True, newl="\n",indent="  ")
 
     with open(save_xml,'w') as f:
         f.write(xml_string)
 
-    save_red_label = os.path.join(save_structure["save"],"red_labelled_mip.tif")
-    save_green_label = os.path.join(save_structure["save"],"green_labelled_mip.tif")
+    save_red_label = os.path.join(save_structure["save"],"single_red_labelled_mip.tif")
+    save_green_label = os.path.join(save_structure["save"],"single_green_labelled_mip.tif")
 
     red_label = save_structure["labelled"][0]
     green_label = save_structure["labelled"][1]
@@ -180,16 +185,22 @@ def save_counts(save_structure, cell_coords):
     tifffile.imsave(save_red_label, red_label.astype(np.uint16))
     tifffile.imsave(save_green_label, green_label.astype(np.uint16))
 
-    mippath = os.path.dirname(save_structure["save"])
-    saveMIP = os.path.join(save_structure["save"], "DualLabeled_MIP.tif")
+    mip_directory = os.path.dirname(save_structure["save"])
+    fileset = []
+    for files in os.listdir(mip_directory):
 
-    dual_dir = sorted([os.path.join(mippath, f) for f in os.listdir(mippath) if (f.endswith('tif') and ('ch00' not in f))])
+        if files.endswith('tif'):
+            fileset.append(os.path.join(mip_directory, files))
 
-    dualmip = []
-    for f in dual_dir:
-        dualmip.append(tifffile.imread(f))
-    dualmip = np.asarray(dualmip)
-    tifffile.imsave(saveMIP, dualmip)
+    fileset = fileset[::-1]
+    images = []
+    for tif in fileset:
+        images.append(tifffile.imread(tif))
+
+    images = np.asarray(images)
+
+    finalfilename = os.path.join(save_structure["save"], "single_composite_MIP.tif")
+    tifffile.imsave(finalfilename, images)
 
 
 """
