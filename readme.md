@@ -1,4 +1,3 @@
-
 # Automatic Cell Counter
 
 This package is meant to assist in the counting of starter cells for the mesoscale connectivity project. It consists of an ImageJ macro to format images,
