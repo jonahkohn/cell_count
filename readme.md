@@ -1,4 +1,3 @@
-
 # Automatic Cell Counter
 
 This package is meant to assist in the counting of starter cells for the mesoscale connectivity project. It consists of an ImageJ macro to format images,
@@ -8,14 +7,15 @@ an XML which is formatted to load into the ImageJ [cell counting plugin](https:/
 
 ### First Time Setup
 
-1. Place **crop_mips_multiple.ijm** into your ImageJ -> Macros folder. Then, install via ImageJ when needed. Optionally, an [ImageJ hotkey](https://imagej.nih.gov/ij/developer/macro/macros.html) can be set up to allow quicker access.  
+1. Using an anaconda terminal, find the cell_count directory. Create an environment with the necessary libraries using `conda create --name cell_count --file spec_file.txt` and then `conda activate cell_count`.
 
-2. Place files named **red_model.h5**, **green_model.h5**, and **basicXML.xml** are placed in the same directory as **cell_count_multiple.py**, as well as the **unet** library.
-Models can be obtained by **??**
+2. Place **crop_mips_multiple.ijm** into your ImageJ -> Macros folder. Then, install via ImageJ when needed. Optionally, an [ImageJ hotkey](https://imagej.nih.gov/ij/developer/macro/macros.html) can be set up to allow quicker access.  
 
-3. Confirm that running **crop_mips_multiple.ijm** creates a cc_save_data folder in each of the MIP folders in a given animal_id folder. This folder should contain the red and green cropped images, as well as a .txt of (x, y) coordinates.
+3. Confirm files named **red_model.h5**, **green_model.h5**, and **basicXML.xml** are placed in the same directory as **cell_count_multiple.py**, as well as the **unet** library.
 
-4. Confirm that running **cell_count_multiple.py** creates a cc_auto_results folder with both composite images and readable coordinates which correspond to a MIP in the dataset. Additionally, check the cc_save_data folders for labelled and segmented images for manual reference.
+4. Confirm that running **crop_mips_multiple.ijm** creates a cc_save_data folder in each of the MIP folders in a given animal_id folder. This folder should contain the red and green cropped images, as well as a .txt of (x, y) coordinates.
+
+5. Confirm that running **cell_count_multiple.py** creates a cc_auto_results folder with both composite images and readable coordinates which correspond to a MIP in the dataset. Additionally, check the cc_save_data folders for labelled and segmented images for manual reference.
 
 
 ### Executing on Data

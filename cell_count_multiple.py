@@ -250,6 +250,7 @@ def save_metadata(save_structure):
     save_path = os.path.join(save_structure["destination"], "metadata.txt")
     metadata = (
                 "Last run on: " + str(date.today()) + "\n" + "\n" +
+
                 "Red model version: " + RED_MODEL_NAME + "\n" +
                 "Red probability threshold: " + str(RED_PROBABILITY_CUTOFF) + "\n" +
                 "Red small object threshold: " + str(RED_SMALL_OBJECT_CUTOFF) + "\n" +
@@ -282,7 +283,6 @@ green_model = init_model(green_model_path)
 destination_folder = os.path.join(animal_id, "cc_auto_results")
 if not os.path.exists(destination_folder):
     os.mkdir(destination_folder)
-
 
 for path in os.listdir(animal_id):
 
