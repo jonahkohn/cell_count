@@ -1,13 +1,13 @@
-import numpy as np
 import os
-import tifffile
 from tkinter import *
 from tkinter import filedialog
 from collections import OrderedDict
-
+from datetime import date
 import ast
+
 import xmltodict
-import dicttoxml
+import tifffile
+import numpy as np
 
 from keras.models import load_model
 from unet.metrics import recall, precision, f1, mcor
@@ -18,8 +18,9 @@ from skimage.morphology import remove_small_objects, watershed
 from skimage.measure import regionprops, label
 from skimage.transform import resize
 from skimage.feature import peak_local_max
-from skimage.util import img_as_uint
+from skimage.filters import gaussian
 import scipy.ndimage as ndi
+from skimage.util import img_as_int
 
 RED_PROBABILITY_CUTOFF = .75
 RED_SMALL_OBJECT_CUTOFF = 25
@@ -30,36 +31,28 @@ GREEN_SMALL_OBJECT_CUTOFF = 20
 RED_MODEL_NAME = "red_model_v0.h5"
 GREEN_MODEL_NAME = "green_model_v0.h5"
 
-# loads images from directory locations, formats images for ML model, loads the model.
-# returns both loaded images and a ML model.
-def initialize(cropped_dir, image_dimension_x = 1024, image_dimension_y = 1024):
+def init_model(model_path):
+
+    model = load_model(model_path,
+                custom_objects={'recall': recall,
+                                'precision': precision,
+                                'f1': f1,
+                                'mcor': mcor,
+                                'weighted_bce_dice_loss': weighted_bce_dice_loss})
+    return model
+
+
+def load_images(save_structure):
 
     image_paths = save_structure["image"]
     images = []
     for i in range(len(image_paths)):
 
         full_img = tifffile.imread(image_paths[i])
-        img = resize(full_img, (image_dimension_x, image_dimension_y, 1)) #converts from 4d np array to 3d
+        img = resize(full_img, (1024, 1024, 1)) #converts from 4d np array to 3d
         images.append(img)
 
-    red_model_path = save_structure["models"][0]
-    green_model_path = save_structure["models"][1]
-
-    red_model = load_model(red_model_path,
-                custom_objects={'recall': recall,
-                                'precision': precision,
-                                'f1': f1,
-                                'mcor': mcor,
-                                'weighted_bce_dice_loss': weighted_bce_dice_loss})
-
-    green_model = load_model(green_model_path,
-                custom_objects={'recall': recall,
-                                'precision': precision,
-                                'f1': f1,
-                                'mcor': mcor,
-                                'weighted_bce_dice_loss': weighted_bce_dice_loss})
-
-    return images, red_model, green_model
+    return images
 
 
 # takes an image and a ML model, and runs prediction and image cleaanup.
@@ -219,16 +212,18 @@ crop_coord_location = [os.path.join(save_directory,f) for f in os.listdir(save_d
 
 red_model_path = os.path.join(RED_MODEL_NAME)
 green_model_path = os.path.join(GREEN_MODEL_NAME)
+red_model = init_model(red_model_path)
+green_model = init_model(green_model_path)
 
 save_structure = {"cwd" : cwd,
                   "image" : MIP_locations,
                   "save" : save_directory,
-                  "models" : (red_model_path, green_model_path),
+                  "models" : (red_model, green_model),
                   "xml" : basicxml,
                   "coords" : crop_coord_location
                   }
 
-mip_images, red_model, green_model = initialize(save_structure)
+mip_images = load_images(save_structure)
 print("----------------------------------------------------------")
 print("Loaded images and model.")
 
