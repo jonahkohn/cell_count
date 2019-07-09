@@ -8,7 +8,7 @@ an XML which is formatted to load into the ImageJ [cell counting plugin](https:/
 
 ### First Time Setup
 
-1. Using an anaconda terminal, find the cell_count directory. Create an environment with the necessary libraries using `conda create --name cell_count --file spec-file.txt` and then `conda activate cell_count`.
+1. Using an anaconda terminal, find the cell_count directory. Create an environment with the necessary libraries using `conda create --name cell_count --file spec_file.txt` and then `conda activate cell_count`.
 
 2. Place **crop_mips_multiple.ijm** into your ImageJ -> Macros folder. Then, install via ImageJ when needed. Optionally, an [ImageJ hotkey](https://imagej.nih.gov/ij/developer/macro/macros.html) can be set up to allow quicker access.  
 
