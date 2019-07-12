@@ -18,9 +18,9 @@ from skimage.morphology import remove_small_objects, watershed
 from skimage.measure import regionprops, label
 from skimage.transform import resize
 from skimage.feature import peak_local_max
-from skimage.util import img_as_int
 from skimage.filters import gaussian
 import scipy.ndimage as ndi
+from skimage.util import img_as_int
 
 RED_PROBABILITY_CUTOFF = .55
 RED_SMALL_OBJECT_CUTOFF = 20
@@ -39,7 +39,6 @@ def init_model(model_path):
                                 'f1': f1,
                                 'mcor': mcor,
                                 'weighted_bce_dice_loss': weighted_bce_dice_loss})
-
     return model
 
 
@@ -144,6 +143,7 @@ def save_counts(save_structure, cell_coords):
     x_off, y_off = offset[0], offset[1]
 
     cell_counts = [[], [], []]
+    composite = os.path.basename(save_structure["composite"])
 
     for cell_type in cell_coords.keys():
 
@@ -169,13 +169,11 @@ def save_counts(save_structure, cell_coords):
 
             cell_count_xml['CellCounter_Marker_File']["Marker_Data"]['Marker_Type'][cell_marker_type]["Marker"] = cell_counts[cell_marker_type]
 
-            composite = os.path.basename(save_structure["composite"])
-
             cell_count_xml['CellCounter_Marker_File']["Image_Properties"]["Image_Filename"] = composite
 
-    xml_id = save_structure["composite"].replace(".tif", "_count.xml")
+    xml_id = "CellCounter_" + composite.replace(".tif", ".xml")
 
-    save_xml = os.path.join(save_structure["save"], xml_id)
+    save_xml = os.path.join(save_structure["destination"], xml_id)
     xml_string = xmltodict.unparse(cell_count_xml, pretty=True, newl="\n",indent="  ")
 
     with open(save_xml,'w') as f:
@@ -263,6 +261,7 @@ def save_metadata(save_structure):
     with open(save_path,'w') as f:
         f.write(metadata)
 
+
 """
 Main
 """
@@ -305,6 +304,7 @@ for path in os.listdir(animal_id):
     for item in os.listdir(datasetpath):
 
         subdir = os.path.join(datasetpath, item, 'MIP')
+
         crop_dir = os.path.join(subdir, 'cc_save_data')
         save_structure["save"] = crop_dir
 
