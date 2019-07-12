@@ -9,9 +9,9 @@ an XML which is formatted to load into the ImageJ [cell counting plugin](https:/
 
 1. Using an anaconda terminal, find the cell_count directory. Create an environment with the necessary libraries using `conda create --name cell_count --file spec_file.txt` and then `conda activate cell_count`.
 
-2. Place **crop_mips_multiple.ijm** into your ImageJ -> Macros folder. Then, install via ImageJ when needed. Optionally, an [ImageJ hotkey](https://imagej.nih.gov/ij/developer/macro/macros.html) can be set up to allow quicker access.  
+2. Place **crop_mips_multiple.ijm** and **crop_mips_single.ijm** into your ImageJ -> Macros folder. Then, install via ImageJ when needed. Optionally, an [ImageJ hotkey](https://imagej.nih.gov/ij/developer/macro/macros.html) can be set up to allow quicker access.  
 
-3. Confirm files named **red_model.h5**, **green_model.h5**, and **basicXML.xml** are placed in the same directory as **cell_count_multiple.py**, as well as the **unet** library.
+3. Access the ML models via [Sharepoint](https://alleninstitute.sharepoint.com/sites/PWA/Imaging/Shared%20Documents/Forms/AllItems.aspx?). Drag the **red_model.h5** and **green_model.h5** files into your cell_count directory.
 
 4. Confirm that running **crop_mips_multiple.ijm** creates a cc_save_data folder in each of the MIP folders in a given animal_id folder. This folder should contain the red and green cropped images, as well as a .txt of (x, y) coordinates.
 
@@ -30,7 +30,7 @@ an XML which is formatted to load into the ImageJ [cell counting plugin](https:/
 
 5. Open the newly created cc_auto_results folder.
 
-6. Initialize any of the composite MIP images using the cell counter plugin. Load the corresponding XML coordinate file.
+6. Initialize the composite MIP images using the cell counter plugin. Load the corresponding XML coordinate files.
 
 7. Confirm cell placements, and adjust thresholds/parameters as necessary. It may be helpful to look in cc_save_data (inside MIP folder) to analyze the segmented images.
 
