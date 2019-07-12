@@ -91,8 +91,8 @@ model = utils.load_model(model_path, custom_objects={'recall': utils.recall,
                                             'f1': utils.f1,
                                             'mcor': utils.mcor,
                                             'weighted_bce_dice_loss': utils.weighted_bce_dice_loss})
-`
 
+`
 Upload your images and masks, named according to the Collab procedure. Train for 50-100 epochs, and do some preliminary tests on the new model. When satisfied, download the new model using the files tab. Make sure to store all old models, and rename the models in use accordingly.
 
 
