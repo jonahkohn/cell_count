@@ -52,15 +52,6 @@ There are a small number of manually determined variables that affect the perfor
 
 - **double_cell_threshold:** This argument belongs to the cell type marking system, and denotes the minimum size (in pixels) of an object before the cell counter determines that the object in question must be two cells. If the cell size is larger than double_cell_threshold, it gets marked as cell type 2.
 
-- **Watershed values**:
-
-    - min_distance
-
-    - footprint
-
-    - compactness
-
-
 #### Best Practices
 
 - Don't resize the ROI rectangle. DeepFLaSH models are only capable of receiving 1024 x 1024 images. If all cells of interest don't fall within a 1024 x 1024 area, use the single_crop and single_count tools provided to assist with the additional counting.
@@ -81,18 +72,18 @@ If the trained models aren't up to the task, they can always be trained further.
 
 If training from an included model, the model must be loaded into Collab, and the script must be directed toward it. Do this by creating a copy of the Collab on your google drive. Drag the model to be trained into the Files tab on the left of the page. Then, insert the following lines into the "model choice" code block, as shown:
 
-`
-Model_name = 'cFOS_Wue'
+```
 
-model_path = os.path.join(" `**`MODEL NAME HERE`**` ")
+Model_name = "cFOS_Wue"
+model_path = os.path.join("MODEL_NAME_HERE.h5")
+model = utils.load_model(model_path, custom_objects={"recall": utils.recall,
+                                            "precision": utils.precision,
+                                            "f1": utils.f1,
+                                            "mcor": utils.mcor,
+                                            "weighted_bce_dice_loss": utils.weighted_bce_dice_loss})
+                                            
 
-model = utils.load_model(model_path, custom_objects={'recall': utils.recall,
-                                            'precision': utils.precision,
-                                            'f1': utils.f1,
-                                            'mcor': utils.mcor,
-                                            'weighted_bce_dice_loss': utils.weighted_bce_dice_loss})
-
-`
+```
 Upload your images and masks, named according to the Collab procedure. Train for 50-100 epochs, and do some preliminary tests on the new model. When satisfied, download the new model using the files tab. Make sure to store all old models, and rename the models in use accordingly.
 
 
