@@ -84,7 +84,7 @@ If training from an included model, the model must be loaded into Collab, and th
 `
 Model_name = 'cFOS_Wue'
 
-model_path = os.path.join("`**`MODEL NAME HERE`**`")
+model_path = os.path.join(" `**`MODEL NAME HERE`**` ")
 
 model = utils.load_model(model_path, custom_objects={'recall': utils.recall,
                                             'precision': utils.precision,
