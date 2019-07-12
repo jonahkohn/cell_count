@@ -82,8 +82,10 @@ If the trained models aren't up to the task, they can always be trained further.
 If training from an included model, the model must be loaded into Collab, and the script must be directed toward it. Do this by creating a copy of the Collab on your google drive. Drag the model to be trained into the Files tab on the left of the page. Then, insert the following lines into the "model choice" code block, as shown:
 
 `
-Model_name = 'cFOS_Wue' #@param ["cFOS_Wue", "cFOS_Inns1", "cFOS_Inns2", "cFOS_Mue", "Parv", "new"]
+Model_name = 'cFOS_Wue'
+
 model_path = os.path.join("`**`MODEL NAME HERE`**`")
+
 model = utils.load_model(model_path, custom_objects={'recall': utils.recall,
                                             'precision': utils.precision,
                                             'f1': utils.f1,
