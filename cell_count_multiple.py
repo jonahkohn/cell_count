@@ -102,7 +102,7 @@ def segment(img, model, probability_cutoff = .50, small_object_cutoff = 30):
     image_labelled, num = label(image_cleaned, return_num = True)
     r_props = regionprops(image_labelled)
 
-    print(str(num) + " labelled cells")
+    print(str(num) + " labelled cells.")
 
     return image_labelled, r_props
 
