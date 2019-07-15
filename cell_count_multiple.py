@@ -100,10 +100,9 @@ def segment(img, model, probability_cutoff = .50, small_object_cutoff = 30):
     image_labelled = label(image_watershed)
     image_cleaned = remove_small_objects(image_labelled, small_object_cutoff, connectivity = 1, in_place = False)
     image_labelled, num = label(image_cleaned, return_num = True)
-
-    print("# labelled: " + str(num))
-
     r_props = regionprops(image_labelled)
+
+    print(str(num) + " labelled cells")
 
     return image_labelled, r_props
 
@@ -137,14 +136,12 @@ def count_overlap(labelled, props, double_cell_threshold = 85, cell_type_classif
                    }
 
     red_props, green_props = props[0], props[1]
-
     red_labelled, green_labelled = labelled[0], labelled[1]
 
     for red_prop in red_props:
 
         red_centroid = red_prop.centroid  #coordinate tuple
         x, y = int(red_centroid[0]), int(red_centroid[1])
-
         red_centroid_label = green_labelled[x][y]   #int value of the red centroid coordinates on the green image
 
         if red_centroid_label != 0:
@@ -152,7 +149,6 @@ def count_overlap(labelled, props, double_cell_threshold = 85, cell_type_classif
             green_centroid = g_prop.centroid
 
             g_x, g_y = int(green_centroid[0]), int(green_centroid[1])
-
             green_centroid_label = red_labelled[g_x][g_y] #int value of the green centroid coordinates on the red image
 
             if green_centroid_label == red_prop.label:
