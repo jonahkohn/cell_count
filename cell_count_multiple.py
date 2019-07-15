@@ -5,9 +5,10 @@ from collections import OrderedDict
 from datetime import date
 import ast
 
-import xmltodict
-import tifffile
+import xmltodict as xtd
+import tifffile as tf
 import numpy as np
+import scipy.ndimage as ndi
 
 from keras.models import load_model
 from unet.metrics import recall, precision, f1, mcor
@@ -19,7 +20,6 @@ from skimage.measure import regionprops, label
 from skimage.transform import resize
 from skimage.feature import peak_local_max
 from skimage.filters import gaussian
-import scipy.ndimage as ndi
 from skimage.util import img_as_int
 
 RED_PROBABILITY_CUTOFF = .55
@@ -31,7 +31,9 @@ GREEN_SMALL_OBJECT_CUTOFF = 10
 RED_MODEL_NAME = "red_model_v0.h5"
 GREEN_MODEL_NAME = "green_model_v0.h5"
 
+
 def init_model(model_path):
+    """ Load the unet using the file specified, then return a model object."""
 
     model = load_model(model_path,
                 custom_objects={'recall': recall,
@@ -43,20 +45,24 @@ def init_model(model_path):
 
 
 def load_images(save_structure):
+    """ Find the MIP pathway, and return the images loaded in tifffile. """
 
     image_paths = save_structure["image"]
     images = []
     for i in range(len(image_paths)):
 
-        full_img = tifffile.imread(image_paths[i])
+        full_img = tf.imread(image_paths[i])
         img = resize(full_img, (1024, 1024, 1)) #converts from 4d np array to 3d
         images.append(img)
 
     return images
 
 
-# takes an image and a ML model, and runs prediction and image cleaanup.
-# returns the modified image and a list of skimage regionprop objects.
+"""
+segment
+
+returns:
+"""
 def segment(img, model, probability_cutoff = .50, small_object_cutoff = 30):
 
     image_predict = model.predict(np.asarray([img]))
@@ -88,9 +94,11 @@ def segment(img, model, probability_cutoff = .50, small_object_cutoff = 30):
     return image_labelled, r_props
 
 
-# takes red and green labelled images (in list) and props (in list) and determines whether cells overlap.
-# centroids (regionprops) are compared to the opposite-channel's labelled image.
-# returns a dictionary of cell classifications, which refer to a list of coordinates.
+"""
+count_overlap
+
+returns:
+"""
 def count_overlap(labelled, props, double_cell_threshold = 85, cell_type_classifier = False):
 
     cell_coords = {"positive" : [],
@@ -131,11 +139,15 @@ def count_overlap(labelled, props, double_cell_threshold = 85, cell_type_classif
     return cell_coords
 
 
-#converts cell_coords into an xml file formatted for the cell counting imageJ plugin.
+"""
+save_counts
+
+returns:
+"""
 def save_counts(save_structure, cell_coords):
 
     with open(save_structure["xml"],'r') as f:
-        cell_count_xml = xmltodict.parse(f.read())  #turns xml skeleton into dictionary
+        cell_count_xml = xtd.parse(f.read())  #turns xml skeleton into dictionary
 
     with open(save_structure["coords"]) as f:
         offset = f.readline()
@@ -174,13 +186,14 @@ def save_counts(save_structure, cell_coords):
     xml_id = "CellCounter_" + composite.replace(".tif", ".xml")
 
     save_xml = os.path.join(save_structure["destination"], xml_id)
-    xml_string = xmltodict.unparse(cell_count_xml, pretty=True, newl="\n",indent="  ")
+    xml_string = xtd.unparse(cell_count_xml, pretty=True, newl="\n",indent="  ")
 
     with open(save_xml,'w') as f:
         f.write(xml_string)
 
 
-def save_mips(save_structure):
+def save_labelled(save_structure):
+    """  """
 
     base = os.path.basename(save_structure["composite"])
 
@@ -193,10 +206,15 @@ def save_mips(save_structure):
     red_label = save_structure["labelled"][0]
     green_label = save_structure["labelled"][1]
 
-    tifffile.imsave(save_red_label, red_label.astype(np.uint16))
-    tifffile.imsave(save_green_label, green_label.astype(np.uint16))
+    tf.imsave(save_red_label, red_label.astype(np.uint16))
+    tf.imsave(save_green_label, green_label.astype(np.uint16))
 
 
+"""
+run
+
+returns: None
+"""
 def run(save_structure):
 
     crop_dir = save_structure["save"]
@@ -219,32 +237,33 @@ def run(save_structure):
     cell_coords = count_overlap(labelled, props, double_cell_threshold = 120, cell_type_classifier = False)
 
     save_counts(save_structure, cell_coords)
-    save_mips(save_structure)
+    save_labelled(save_structure)
 
 
-def make_composite(mip_directory, save_directory):
+def make_composite(composite_name, mip_directory, save_directory):
+    """ Look in mip_directory for .tif files, then combine them into a composite image. Return the saved filename. """
+
     fileset = []
-    for files in os.listdir(mip_directory):
-
-        if files.endswith('tif'):
-            fileset.append(os.path.join(mip_directory, files))
+    for file in os.listdir(mip_directory):
+        if file.endswith('tif'):
+            fileset.append(os.path.join(mip_directory, file))
 
     fileset = fileset[::-1]
     images = []
     for tif in fileset:
-        images.append(tifffile.imread(tif))
+        images.append(tf.imread(tif))
 
     images = np.asarray(images)
 
-    finalfilename = path + '_' + item +'.tif'
-
-    finalfilename = os.path.join(save_directory, finalfilename)
-    tifffile.imsave(finalfilename,images)
+    finalfilename = os.path.join(save_directory, composite_name +'.tif')
+    tf.imsave(finalfilename,images)
 
     return finalfilename
 
 
 def save_metadata(save_structure):
+    """Create a .txt file in the composite directory, and write all global variables to it."""
+
     save_path = os.path.join(save_structure["destination"], "metadata.txt")
     metadata = (
                 "Last run on: " + str(date.today()) + "\n" + "\n" +
@@ -262,59 +281,64 @@ def save_metadata(save_structure):
         f.write(metadata)
 
 
-"""
-Main
-"""
+def main():
+    """
 
-cwd = os.getcwd()
+    Main
 
-basicxml = [os.path.join(cwd,f) for f in os.listdir(cwd) if 'basicxml' in f][0] #skeleton file for imagej plugin
+    """
+    cwd = os.getcwd()
 
-root = Tk()
-root.withdraw()
-animal_id = filedialog.askdirectory(initialdir=cwd,title='Select the animal ID folder.')
+    basicxml = [os.path.join(cwd,f) for f in os.listdir(cwd) if 'basicxml' in f][0] #skeleton file for imagej plugin
 
-red_model_path = os.path.join(RED_MODEL_NAME)
-green_model_path = os.path.join(GREEN_MODEL_NAME)
-red_model = init_model(red_model_path)
-green_model = init_model(green_model_path)
+    root = Tk()
+    root.withdraw()
+    animal_id = filedialog.askdirectory(initialdir=cwd,title='Select the animal ID folder.')
 
-destination_folder = os.path.join(animal_id, "cc_auto_results")
-if not os.path.exists(destination_folder):
-    os.mkdir(destination_folder)
+    red_model_path = os.path.join(RED_MODEL_NAME)
+    green_model_path = os.path.join(GREEN_MODEL_NAME)
+    red_model = init_model(red_model_path)
+    green_model = init_model(green_model_path)
 
-for path in os.listdir(animal_id):
+    destination_folder = os.path.join(animal_id, "cc_auto_results")
+    if not os.path.exists(destination_folder):
+        os.mkdir(destination_folder)
 
-    save_structure = {"cwd" : cwd,
-                      "animal" : animal_id,
-                      "models" : (red_model, green_model),
-                      "xml" : basicxml,
-                      "destination" : destination_folder,
-                      "save" : None,
-                      "image" : None,
-                      "composite" : None,
-                      "coords" : None
-                      }
+    for path in os.listdir(animal_id):
 
-    if "cc_auto_results" in path:
-        continue
+        save_structure = {"cwd" : cwd,
+                          "animal" : animal_id,
+                          "models" : (red_model, green_model),
+                          "xml" : basicxml,
+                          "destination" : destination_folder,
+                          "save" : None,
+                          "image" : None,
+                          "composite" : None,
+                          "coords" : None
+                          }
 
-    datasetpath = os.path.join(animal_id, path)
+        if "cc" in path:
+            continue
 
-    for item in os.listdir(datasetpath):
+        datasetpath = os.path.join(animal_id, path)
 
-        subdir = os.path.join(datasetpath, item, 'MIP')
+        for item in os.listdir(datasetpath):
 
-        crop_dir = os.path.join(subdir, 'cc_save_data')
-        save_structure["save"] = crop_dir
+            subdir = os.path.join(datasetpath, item, 'MIP')
+            crop_dir = os.path.join(subdir, 'cc_save_data')
+            save_structure["save"] = crop_dir
 
-        composite_name = make_composite(subdir, save_structure["destination"])
-        save_structure["composite"] = composite_name
+            composite_name = make_composite(path + '_' + item, subdir, save_structure["destination"])
+            save_structure["composite"] = composite_name
 
-        run(save_structure)
+            run(save_structure)
 
-        print("Completed counting for : " + os.path.basename(composite_name))
-        print("---------------------------------------")
+            print("Completed counting for : " + os.path.basename(composite_name))
+            print("-------------------------------------")
 
-save_metadata(save_structure)
-print("Saved, exiting.")
+    save_metadata(save_structure)
+    print("Saved, exiting.")
+
+
+if __name__ == "__main__":
+    main()
