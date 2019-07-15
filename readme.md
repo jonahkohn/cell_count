@@ -20,19 +20,21 @@ an XML which is formatted to load into the ImageJ [cell counting plugin](https:/
 
 ### Executing on Data
 
-1. Copy the desired animal_id folder anywhere on your desktop.
+1. Enter your cellcount conda environment by running `conda activate cell_count` in your terminal.
 
-2. Run crop_mips_multiple.ijm in ImageJ, and select the copied animal_id folder.
+2. Copy the desired animal_id folder anywhere on your desktop.
 
-3. Using the rectangle pointer tool, adjust the given ROI rectangle to include the cells in the MIP image. Do not adjust the size of the rectangle.
+3. Run crop_mips_multiple.ijm in ImageJ, and select the copied animal_id folder.
 
-4. Using the terminal, run **cell_count_multiple.py**. Select the copied animal_id folder again.
+4. Using the rectangle pointer tool, adjust the given ROI rectangle to include the cells in the MIP image. 
 
-5. Open the newly created cc_auto_results folder.
+5. Using the terminal, run **cell_count_multiple.py**. Select the copied animal_id folder again.
 
-6. Initialize the composite MIP images using the cell counter plugin. Load the corresponding XML coordinate files.
+6. Open the newly created cc_auto_results folder.
 
-7. Confirm cell placements, and adjust thresholds/parameters as necessary. It may be helpful to look in cc_save_data (inside MIP folder) to analyze the segmented images.
+7. Initialize the composite MIP images using the cell counter plugin. Load the corresponding XML coordinate files.
+
+8. Confirm cell placements, and adjust thresholds/parameters as necessary. It may be helpful to look in cc_save_data (inside MIP folder) to analyze the segmented images.
 
 
 ### Tips and Adjustments
