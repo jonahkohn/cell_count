@@ -58,7 +58,6 @@ def load_images(save_structure):
     return images
 
 
-
 def segment(img, model, probability_cutoff = .50, small_object_cutoff = 30):
     """Uses a DeepFLaSH model to segment a 1024 x 1024 image, then binarizes at probability_cutoff. Watersheds and labels the image.
 
@@ -196,7 +195,7 @@ def save_counts(save_structure, cell_coords):
     offset = ast.literal_eval(offset) #reads the string as a tuple, for immediate typecasting.
     x_off, y_off = offset[0], offset[1]
 
-    cell_counts = [[], [], []]
+    cell_counts = [[] for _ in range(len(cell_coords))]
     composite = os.path.basename(save_structure["composite"])
 
     for cell_type in cell_coords.keys():
@@ -248,7 +247,7 @@ def save_labelled(save_structure):
     red_label = save_structure["labelled"][0]
     green_label = save_structure["labelled"][1]
 
-    tf.imsave(save_red_label, red_label.astype(np.uint16))
+    tf.imsave(save_red_label, red_label.astype(np.uint16)) #type conversion for image accessibility in imageJ
     tf.imsave(save_green_label, green_label.astype(np.uint16))
 
 
@@ -305,10 +304,10 @@ def make_composite(composite_name, mip_directory, save_directory):
     for tif in fileset:
         images.append(tf.imread(tif))
 
-    images = np.asarray(images)
+    images = np.asarray(images) #creates composite from list of single-channel images.
 
     finalfilename = os.path.join(save_directory, composite_name +'.tif')
-    tf.imsave(finalfilename,images)
+    tf.imsave(finalfilename, images)
 
     return finalfilename
 
@@ -370,7 +369,7 @@ def main():
                           "coords" : None
                           }
 
-        if "cc" in path:
+        if "cc" in path: #avoids scanning composites as they are created
             continue
 
         datasetpath = os.path.join(animal_id, path)
