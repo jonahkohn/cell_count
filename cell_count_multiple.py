@@ -65,7 +65,7 @@ def segment(img, model, probability_cutoff = .50, small_object_cutoff = 30):
     that a cell exists in that pixel. This image is thresholded at the user-determined probability_cutoff. A watershed is performed,
     and then objects smaller than small_object_cutoff are removed. Each remaining object in the binary image is labelled.
 
-    Paramaters
+    Parameters
     ----------
     img : numpy array with shape of (1024, 1024). Single-channel image to be segmented.
     model : loaded DeepFLaSH model object.
@@ -80,9 +80,7 @@ def segment(img, model, probability_cutoff = .50, small_object_cutoff = 30):
     """
 
     image_predict = model.predict(np.asarray([img]))
-    img = np.reshape(image_predict, (1024, 1024))
-
-    image_predict = img
+    image_predict = np.reshape(image_predict, (1024, 1024))
 
     cutoff_indexes = image_predict <= probability_cutoff
     image_predict[cutoff_indexes] = 0 #adjusts the image to only include pixels above probability_cutoff
@@ -93,7 +91,7 @@ def segment(img, model, probability_cutoff = .50, small_object_cutoff = 30):
 
     distance = ndi.distance_transform_edt(image_predict)
     distance_blur = gaussian(distance, sigma = 1.2, preserve_range = True)
-    local_maxi = peak_local_max(distance_blur, indices = False, footprint = np.ones((8, 8)), labels = img)
+    local_maxi = peak_local_max(distance_blur, indices = False, footprint = np.ones((8, 8)), labels = image_predict)
     markers = ndi.label(local_maxi)[0]
     image_watershed = watershed(-distance_blur, markers, mask = image_predict, watershed_line = True)
 
@@ -117,7 +115,7 @@ def count_overlap(labelled, props, double_cell_threshold = 85, cell_type_classif
     Optionally, various cell types can be marked by different properties. If cell_type_classifier is True, cell types
     other than "positive" will be recorded, and later stored as different cell markers in imageJ.
 
-    Paramaters
+    Parameters
     ----------
     labelled : tuple of red (0) and green (1) labelled images, as returned from segment().
     props: tuple of red (0) and green (1) regionprops, as returned from segment().
@@ -172,7 +170,7 @@ def save_counts(save_structure, cell_coords):
     recorded in save_structure["coords"], to account for the original cropping of the image. xml skeleton
     is found in main(), and read from save_structure["xml"].
 
-    Paramaters
+    Parameters
     ----------
     save_structure : dictionary containing the current iteration's directories.
     cell_coords : dictionary of lists containing cell coordinates and classifications, as returned from count_overlap.
@@ -254,7 +252,7 @@ def run(save_structure):
     the coordinates and segmented images using count_overlap(), save_labelled(), and save_counts(). Assumes the existence
     of a cc_save_data folder containing ch01 and ch02 cropped images, as well as crop coordinates in a .txt file.
 
-    Paramaters
+    Parameters
     ----------
     save_structure : dictionary containing the current iteration's directories.
 
