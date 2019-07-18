@@ -45,10 +45,6 @@ def init_model(model_path):
 class Counter:
 
     def __init__(self, name, models, crop_dir, destination_dir = None):
-        """
-
-
-        """
 
         self.name = name
 
@@ -150,6 +146,7 @@ class Counter:
 
         return image_labelled, r_props
 
+
     def count_overlap(self, labelled, props, double_cell_threshold = 85, cell_type_classifier = False):
         """Iterates over the red objects, and looks for overlapping green objects. Stores coordinates of overlap.
 
@@ -182,7 +179,6 @@ class Counter:
         red_labelled, green_labelled = labelled[0], labelled[1]
 
         for red_prop in red_props:
-
             red_centroid = red_prop.centroid  #coordinate tuple
             x, y = int(red_centroid[0]), int(red_centroid[1])
             red_centroid_label = green_labelled[x][y]   #int value of the red centroid coordinates on the green image
