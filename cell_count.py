@@ -1,6 +1,5 @@
 import os
-from tkinter import *
-from tkinter import filedialog
+from tkinter import filedialog, Tk
 from collections import OrderedDict
 from datetime import date
 import ast
