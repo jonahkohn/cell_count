@@ -46,6 +46,10 @@ def init_model(model_path):
 class Counter:
 
     def __init__(self, name, models, crop_dir, destination_dir = None):
+        """
+
+
+        """
 
         self.name = name
 
@@ -64,8 +68,14 @@ class Counter:
         self.crop_coord_dir = [os.path.join(self.cc_save_data,f) for f in os.listdir(self.cc_save_data) if (f.endswith('coords.txt'))][0]
 
 
-
     def execute(self):
+        """Runs the cell counting procedure for a Counter object.
+
+        Loads and segments the MIP images using load_images() and segment(). Counts the cells and saves
+        the coordinates and segmented images using count_overlap(), save_labelled(), and save_counts(). Assumes the existence
+        of a cc_save_data folder containing ch01 and ch02 cropped images, as well as crop coordinates in a .txt file.
+
+        """
 
         mip_images = self.load_images(self.mip_dir)
 
@@ -203,12 +213,10 @@ class Counter:
         """Writes all cell (x, y) coordinates into an xml file readable by the imageJ cellcount plugin.
 
         xmltodict is used to read and write xml files as dictionaries. All coordinates are offset by the amount
-        recorded in save_structure["coords"], to account for the original cropping of the image. xml skeleton
-        is found in main(), and read from save_structure["xml"].
+        recorded in self.crop_coord_dir, to account for the original cropping of the image.
 
         Parameters
         ----------
-        save_structure : dictionary containing the current iteration's directories.
         cell_coords : dictionary of lists containing cell coordinates and classifications, as returned from count_overlap.
 
         Returns
@@ -261,6 +269,7 @@ class Counter:
         with open(save_xml,'w') as f:
             f.write(xml_string)
 
+
     def save_labelled(self):
         """Saves the segmented and labelled red and green images to the crop subdirectory with type uint16."""
 
@@ -299,7 +308,6 @@ class Counter:
 
 
 
-
 def save_metadata(destination_folder):
     """Creates a metadata.txt file in the composite directory and writes all global variables to it, along with the current date."""
 
@@ -321,14 +329,33 @@ def save_metadata(destination_folder):
 
 
 def run_single(crop_dir, models):
+    """Creates a Counter object using directory and model parameters. Executes."""
 
-        counter = Counter("single_count.tif", models, crop_dir)
-        counter.execute()
+    counter = Counter("single_count.tif", models, crop_dir)
+    counter.execute()
 
-        print("Completed counting for : " + counter.name)
-        print("-------------------------------------")
+    print("Completed counting for : " + counter.name)
+    print("-------------------------------------")
+
+    save_metadata(crop_dir)
+    print("Saved, exiting.")
+
 
 def run_multiple(animal_id, models):
+    """Parses through the animal_id directory to find all MIP folders, then creates a Counter object for each. Executes.
+
+    Creates a cc_auto_results folder in which to store the count xml files and their composite MIP counterparts.
+
+    Parameters
+    ----------
+    animal_id : string, directory of the brain folder.
+    models : loaded DeepFLaSH model objects.
+
+    Returns
+    -------
+    None
+
+    """
 
     destination_folder = os.path.join(animal_id, "cc_auto_results")
     if not os.path.exists(destination_folder):
@@ -358,11 +385,9 @@ def run_multiple(animal_id, models):
 
 
 def main():
-    """Prompts the user to select a folder, then parses the directory structure to call run() on every crop folder.
+    """Prompts the user to select a folder, then loads ML models and calls run() on every available MIP.
 
-    main() also creates a new folder cc_save_data and populates it with composite images of every MIP, as well as coordinates.
-    save_structure is used to pass common arguments on to many different functions, and is modified by every folder iteration.
-
+    Either run_single or run_multiple is called, depending on the folder type selected.
     """
 
     root = Tk()
