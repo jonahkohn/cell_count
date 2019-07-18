@@ -369,7 +369,7 @@ def main():
     root.withdraw()
     chosen_folder = filedialog.askdirectory(initialdir = os.getcwd(), title = "Select the animal ID folder.")
 
-    if chosen_folder is None:
+    if chosen_folder == "":
         raise Exception("No folder was chosen.")
 
     red_model_path = os.path.join(RED_MODEL_NAME)
