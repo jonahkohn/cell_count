@@ -47,7 +47,7 @@ function load_multiple(animal_id){
                         red_mip_path = replace(red_mip_path, "//", "/");
                         red_mip_path = replace(red_mip_path, "/", "\\");
 
-                        execute(red_mip_path);
+                        execute(red_mip_path, "");
 
                     } //if
                 } // for ch
@@ -68,14 +68,14 @@ function load_single(mip_folder){
             red_mip_path = replace(red_mip_path, "//", "/");
             red_mip_path = replace(red_mip_path, "/", "\\");
 
-            execute(red_mip_path);
+            execute(red_mip_path, "_single");
 
         } //if
     } // for ch
 } //load_single
 
 
-function execute(red_path) {
+function execute(red_path, folder_extension) {
 
     open(red_path);
     close("\\Others");
@@ -83,7 +83,7 @@ function execute(red_path) {
 
     red_filename = File.getName(red_path);
     directory = File.getParent(red_path);
-    savepath = directory + "/cc_save_data";
+    savepath = directory + "/cc_save_data" + folder_extension;
     File.makeDirectory(savepath);
 
     makeRectangle(0, 0, 1024, 1024);
