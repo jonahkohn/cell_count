@@ -1,9 +1,29 @@
 
+macro "Crop Mips" {
+
+    chosen_folder = getDirectory("Select the animal ID or MIP folder");
+
+    if (endsWith(chosen_folder, "MIP\\")){
+        load_single(chosen_folder);
+    }
+    else{
+        load_multiple(chosen_folder);
+    }
+
+} // macro
 
 
-macro "Cell Count Crop [H]" {
+function crop(path, destination, x, y) {
 
-    animal_id = getDirectory("Select the animal ID folder");
+    makeRectangle(x, y, 1024, 1024);
+    run("Crop");
+    saveAs("tif", destination);
+
+} //crop
+
+
+function load_multiple(animal_id){
+
     datasets = getFileList(animal_id);
 
     for (i = 0; i < datasets.length; i++) {
@@ -27,24 +47,35 @@ macro "Cell Count Crop [H]" {
                         red_mip_path = replace(red_mip_path, "//", "/");
                         red_mip_path = replace(red_mip_path, "/", "\\");
 
-                        execute(red_mip_path);
+                        execute(red_mip_path, "");
 
+                    } //if
                 } // for ch
             } // for j
         } // else
     } // for i
-} // macro
+} //load_multiple
 
 
-function crop(path, destination, x, y) {
+function load_single(mip_folder){
 
-    makeRectangle(x, y, 1024, 1024);
-    run("Crop");
-    saveAs("tif", destination);
-}
+    mip_images = getFileList(mip_folder);
+
+    for (ch = 0; ch < mip_images.length; ch++) {
+
+        if (endsWith( mip_images[ch], "ch02.tif")){
+            red_mip_path = mip_folder + "\\" + mip_images[ch];
+            red_mip_path = replace(red_mip_path, "//", "/");
+            red_mip_path = replace(red_mip_path, "/", "\\");
+
+            execute(red_mip_path, "_single");
+
+        } //if
+    } // for ch
+} //load_single
 
 
-function execute(red_path) {
+function execute(red_path, folder_extension) {
 
     open(red_path);
     close("\\Others");
@@ -52,7 +83,7 @@ function execute(red_path) {
 
     red_filename = File.getName(red_path);
     directory = File.getParent(red_path);
-    savepath = directory + "/cc_save_data";
+    savepath = directory + "/cc_save_data" + folder_extension;
     File.makeDirectory(savepath);
 
     makeRectangle(0, 0, 1024, 1024);
