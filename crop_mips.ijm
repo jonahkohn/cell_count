@@ -90,9 +90,9 @@ function execute(red_path, folder_extension) {
     waitForUser("Move the rectangle over the cells of interest, then press OK.");
     getSelectionCoordinates(xPoints,yPoints);
         x = xPoints[0];
-        y = yPoints[0];
+        y = yPoints[0];  //x and y refer to the top left corner of the rectangle.
 
-    coords = "("+x+","+y+")";
+    coords = "("+x+","+y+")";  //this format is directly readable as a python tuple.
     coord_file =  replace(red_filename, "ch02.tif", "coords.txt");
     File.saveString(coords, savepath + "/" + coord_file);
 
