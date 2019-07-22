@@ -80,7 +80,7 @@ class Counter:
         self.labelled = (r_labelled, g_labelled)
         self.props = (r_props, g_props)
 
-        cell_coords = self.count_overlap(self.labelled, self.props, double_cell_threshold = 120, cell_type_classifier = False)
+        cell_coords = self.count_overlap(double_cell_threshold = 120, cell_type_classifier = False)
 
         self.save_counts(cell_coords)
         self.save_composite()
@@ -147,7 +147,7 @@ class Counter:
         return image_labelled, r_props
 
 
-    def count_overlap(self, labelled, props, double_cell_threshold = 85, cell_type_classifier = False):
+    def count_overlap(self, double_cell_threshold = 85, cell_type_classifier = False):
         """Iterates over the red objects, and looks for overlapping green objects. Stores coordinates of overlap.
 
         Each red object's centroid location is accessed in the green labelled image. If the coordinates belong to an object in
@@ -175,8 +175,8 @@ class Counter:
                        "red" : []
                        }
 
-        red_props, green_props = props[0], props[1]
-        red_labelled, green_labelled = labelled[0], labelled[1]
+        red_props, green_props = self.props[0], self.props[1]
+        red_labelled, green_labelled = self.labelled[0], self.labelled[1]
 
         for red_prop in red_props:
             red_centroid = red_prop.centroid  #coordinate tuple
