@@ -49,7 +49,6 @@ class Counter:
         self.name = name
 
         self.cwd = os.getcwd()
-        self.basicxml = [os.path.join(self.cwd, f) for f in os.listdir(self.cwd) if 'basicxml' in f][0] #skeleton file for imagej plugin
         self.models = models
         self.cc_save_data = crop_dir
 
@@ -59,6 +58,7 @@ class Counter:
         else:
             self.cc_auto_results = destination_dir
 
+        self.basicxml = [os.path.join(self.cwd, f) for f in os.listdir(self.cwd) if 'basicxml' in f][0] #skeleton file for imagej plugin
         self.mip_dir = sorted([os.path.join(self.cc_save_data,f) for f in os.listdir(self.cc_save_data) if (f.endswith('tif') and ("label" not in f))])
         self.crop_coord_dir = [os.path.join(self.cc_save_data,f) for f in os.listdir(self.cc_save_data) if (f.endswith('coords.txt'))][0]
 
@@ -80,9 +80,9 @@ class Counter:
         self.labelled = (r_labelled, g_labelled)
         self.props = (r_props, g_props)
 
-        cell_coords = self.count_overlap(double_cell_threshold = 120, cell_type_classifier = False)
+        self.cell_coords = self.count_overlap(double_cell_threshold = 120, cell_type_classifier = False)
 
-        self.save_counts(cell_coords)
+        self.save_counts()
         self.save_composite()
         self.save_labelled()
 
@@ -204,7 +204,7 @@ class Counter:
         return cell_coords
 
 
-    def save_counts(self, cell_coords):
+    def save_counts(self):
         """Writes all cell (x, y) coordinates into an xml file readable by the imageJ cellcount plugin.
 
         xmltodict is used to read and write xml files as dictionaries. All coordinates are offset by the amount
@@ -228,9 +228,9 @@ class Counter:
         offset = ast.literal_eval(offset) #reads the string as a tuple, for immediate typecasting.
         x_off, y_off = offset[0], offset[1]
 
-        cell_counts = [[] for _ in range(len(cell_coords))]
+        cell_counts = [[] for _ in range(len(self.cell_coords))]
 
-        for cell_type in cell_coords.keys():
+        for cell_type in self.cell_coords.keys():
 
             if cell_type == "positive":
                 cell_marker_type = 0
@@ -239,9 +239,9 @@ class Counter:
             else:
                 cell_marker_type = 2
 
-            if len(cell_coords[cell_type]) != 0:
+            if len(self.cell_coords[cell_type]) != 0:
 
-                for cell in cell_coords[cell_type]:
+                for cell in self.cell_coords[cell_type]:
 
                     x, y = cell[0], cell[1]
 
