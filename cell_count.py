@@ -72,7 +72,7 @@ class Counter:
 
         """
 
-        mip_images = self.load_images(self.mip_dir)
+        mip_images = self.load_images()
 
         r_labelled, r_props = self.segment(mip_images[1], self.models[0], probability_cutoff = RED_PROBABILITY_CUTOFF, small_object_cutoff = RED_SMALL_OBJECT_CUTOFF)
         g_labelled, g_props = self.segment(mip_images[0], self.models[1], probability_cutoff = GREEN_PROBABILITY_CUTOFF, small_object_cutoff = GREEN_SMALL_OBJECT_CUTOFF)
@@ -87,13 +87,13 @@ class Counter:
         self.save_labelled()
 
 
-    def load_images(self, mip_dir):
+    def load_images(self):
         """Finds the MIP pathway, and returns the images loaded in tifffile."""
 
         images = []
-        for i in range(len(mip_dir)):
+        for i in range(len(self.mip_dir)):
 
-            full_img = tf.imread(mip_dir[i])
+            full_img = tf.imread(self.mip_dir[i])
             img = resize(full_img, (1024, 1024, 1)) #converts from 4d np array to 3d
             images.append(img)
 
