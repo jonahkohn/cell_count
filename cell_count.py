@@ -1,7 +1,7 @@
 import os
 from tkinter import filedialog, Tk
 from collections import OrderedDict
-from datetime import date
+import datetime
 import ast
 
 import xmltodict as xtd
@@ -307,14 +307,17 @@ def save_metadata(destination_folder):
     """Creates a metadata.txt file in the composite directory and writes all global variables to it, along with the current date."""
 
     save_path = os.path.join(destination_folder, "metadata.txt")
-    metadata = (
-                "Last run on: " + str(date.today()) + "\n" + "\n" +
+    red_time = os.path.getctime(os.path.join(os.getcwd(), RED_MODEL_NAME))
+    green_time = os.path.getctime(os.path.join(os.getcwd(), GREEN_MODEL_NAME))
 
-                "Red model version: " + RED_MODEL_NAME + "\n" +
+    metadata = (
+                "Last run on: " + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "\n" + "\n" +
+
+                "Red model version: " + RED_MODEL_NAME + " (created " + datetime.datetime.fromtimestamp(red_time).strftime('%c') + ")\n" +
                 "Red probability threshold: " + str(RED_PROBABILITY_CUTOFF) + "\n" +
                 "Red small object threshold: " + str(RED_SMALL_OBJECT_CUTOFF) + "\n" +
                 "\n" +
-                "Green model version: " + GREEN_MODEL_NAME + "\n" +
+                "Green model version: " + GREEN_MODEL_NAME + " (created " + datetime.datetime.fromtimestamp(green_time).strftime('%c') + ")\n" +
                 "Green probability threshold: " + str(GREEN_PROBABILITY_CUTOFF) + "\n" +
                 "Green small object threshold: " + str(GREEN_SMALL_OBJECT_CUTOFF) + "\n"
                )
